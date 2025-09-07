@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Kundali & Horoscope</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{font-family:system-ui,Arial; padding:20px; max-width:900px; margin:auto}
+    label{display:block;margin:8px 0}
+    input, button {padding:8px; margin-top:6px; width:100%; box-sizing:border-box}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    pre{background:#f5f5f5;padding:12px;border-radius:6px;overflow:auto}
+  </style>
+</head>
+<body>
+  <h1>Kundali & Horoscope</h1>
+  <form id="f">
+    <label>Name <input name="name" required /></label>
+    <label>Date of birth <input name="dob" type="date" required /></label>
+    <div class="row">
+      <div class="col"><label>Time <input name="time" type="time" required /></label></div>
+      <div class="col"><label>Place <input name="place" required placeholder="City, Country" /></label></div>
+    </div>
+    <button type="submit">Generate Kundali</button>
+  </form>
+
+  <div id="result" style="margin-top:16px"></div>
+
+<script>
+  const f=document.getElementById('f');
+  const r=document.getElementById('result');
+  f.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    r.innerHTML='Generating...';
+    const data = Object.fromEntries(new FormData(f).entries());
+    try{
+      const resp = await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+      if(!resp.ok){
+        const err = await resp.json().catch(()=>({error: resp.statusText}));
+        r.innerHTML = '<pre>'+JSON.stringify(err,null,2)+'</pre>';
+        return;
+      }
+      const json = await resp.json();
+      r.innerHTML = '<h3>Result</h3><pre>'+JSON.stringify(json,null,2)+'</pre>';
+    }catch(err){
+      r.innerText = 'Network error: '+err.message;
+    }
+  });
+</script>
+</body>
+</html>
